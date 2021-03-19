@@ -1,0 +1,261 @@
+---
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: psp.flannel.unprivileged
+  annotations:
+    seccomp.security.alpha.kubernetes.io/allowedProfileNames: docker/default
+    seccomp.security.alpha.kubernetes.io/defaultProfileName: docker/default
+    apparmor.security.beta.kubernetes.io/allowedProfileNames: runtime/default
+    apparmor.security.beta.kubernetes.io/defaultProfileName: runtime/default    
+spec:
+  # privileged: false
+  volumes:
+  - configMap
+  - secret
+  - emptyDir
+  - hostPath
+  allowedHostPaths:
+  - pathPrefix: "/etc/cni/net.d"
+  - pathPrefix: "/etc/kube-flannel"
+  - pathPrefix: "/run/flannel"
+  # readOnlyRootFilesystem: false
+  # Users and groups
+  runAsUser:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  fsGroup:
+    rule: RunAsAny
+  # Privilege Escalation
+  allowPrivilegeEscalation: false
+  defaultAllowPrivilegeEscalation: false
+  # Capabilities
+  allowedCapabilities: ['NET_ADMIN', 'NET_RAW']
+  # defaultAddCapabilities: []
+  # requiredDropCapabilities: []
+  # Host namespaces
+  # hostPID: false
+  # hostIPC: false
+  hostNetwork: true
+  hostPorts:
+  - min: 0
+    max: 65535
+  # SELinux
+  seLinux:
+    # SELinux is unused in CaaSP
+    rule: 'RunAsAny'
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: flannel
+rules:
+- apiGroups: ['extensions']
+  resources: ['podsecuritypolicies']
+  verbs: ['use']
+  resourceNames: ['psp.flannel.unprivileged']
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - nodes/status
+  verbs:
+  - patch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: flannel
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: flannel
+subjects:
+- kind: ServiceAccount
+  name: flannel
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: flannel
+  namespace: kube-system
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: kube-flannel-cfg
+  namespace: kube-system
+  labels:
+    tier: node
+    app: flannel
+data:
+  cni-conf.json: |
+    {
+      "name": "vxlan0",
+      "cniVersion": "0.3.1",
+      "plugins": [{
+          "type": "flannel",
+          "delegate": {
+            "isDefaultGateway": true
+          }
+        },
+        {
+          "type": "portmap",
+          "capabilities": {
+            "portMappings": true
+          }
+        }
+      ]
+    }
+  net-conf.json: |
+    {
+      "Network": "10.42.0.0/16",
+      "SubnetLen": 24,
+      "Name": "vxlan0",
+      "Backend": {
+        "Type": "vxlan",
+        "VNI" : 4096,
+        "Port": 4789
+      }
+    }
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kube-flannel
+  namespace: kube-system
+  labels:
+    tier: node
+    app: flannel
+spec:
+  selector:
+    matchLabels:
+      app: flannel
+  template:
+    metadata:
+      labels:
+        tier: node
+        app: flannel
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: beta.kubernetes.io/os
+                operator: NotIn
+                values:
+                - windows
+      # nodeSelector:
+      #   kubernetes.io/os: linux
+      priorityClassName: system-node-critical
+      containers:
+      - command:
+        - /install-cni.sh
+        env:
+        - name: CNI_NETWORK_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: cni-conf.json
+              name: kube-flannel-cfg
+        - name: CNI_CONF_NAME
+          value: 10-flannel.conflist
+        name: install-cni
+        imagePullPolicy: IfNotPresent
+        image: rancher/flannel-cni:v0.3.0-rancher6 
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File                
+        volumeMounts:
+        - mountPath: /host/etc/cni/net.d
+          name: cni
+        - mountPath: /host/opt/cni/bin/
+          name: host-cni-bin
+         
+      - args:
+        - --ip-masq
+        - --kube-subnet-mgr
+        - --v=1
+        command:
+          - /opt/bin/flanneld        
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "50Mi"
+          limits:
+            cpu: "100m"
+            memory: "50Mi"
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace               
+        - name: TARGET_NAMESPACE
+          value: kube-system
+        - name: KUBERNETES_SERVICE_HOST
+          value: 10.43.0.1
+        - name: KUBERNETES_SERVICE_PORT
+          value: "443"
+        - name: NO_PROXY
+          value: .svc,.cluster.local,10.42.0.0/16,10.43.0.0/16
+        name: kube-flannel
+        image: rancher/coreos-flannel:v0.13.0-rancher1
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          # privileged: true
+          privileged: false
+          capabilities:
+            add: ["NET_ADMIN", "NET_RAW"]  
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File             
+        volumeMounts:
+        - mountPath: /run
+          name: run
+        - mountPath: /etc/cni/net.d
+          name: cni
+        - mountPath: /etc/kube-flannel/
+          name: flannel-cfg
+      serviceAccount: flannel
+      serviceAccountName: flannel
+      hostNetwork: true
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      restartPolicy: Always
+      tolerations:
+      - operator: Exists          
+      volumes:
+      - hostPath:
+          path: /run
+          type: ""
+        name: run
+      - hostPath:
+          path: /etc/cni/net.d
+          type: ""
+        name: cni
+      - configMap:
+          defaultMode: 420
+          name: kube-flannel-cfg
+        name: flannel-cfg
+      - hostPath:
+          path: /opt/cni/bin
+          type: ""
+        name: host-cni-bin
