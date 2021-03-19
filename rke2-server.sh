@@ -18,3 +18,5 @@ cat /var/lib/rancher/rke2/server/node-token
 
 export PATH=$PATH:/var/lib/rancher/rke2/bin/
 export KUBECONFIG="/etc/rancher/rke2/rke2.yaml"
+crictl config --set runtime-endpoint=unix:///run/k3s/containerd/containerd.sock
+
