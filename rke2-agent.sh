@@ -4,6 +4,7 @@
 curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE="agent" sh -
 systemctl enable rke2-agent.service
 mkdir -p /etc/rancher/rke2/
+
 vi /etc/rancher/rke2/config.yaml
 
 #server: <https://IP>
@@ -11,4 +12,5 @@ vi /etc/rancher/rke2/config.yaml
 server:
 token:
 
+export PATH=$PATH:/var/lib/rancher/rke2/bin/
 crictl config --set runtime-endpoint=unix:///run/k3s/containerd/containerd.sock
