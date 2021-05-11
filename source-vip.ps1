@@ -1,29 +1,29 @@
-    $sourceVipJson = [io.Path]::Combine($Global:BaseDir,  "sourceVip.json")
-    $sourceVipRequest = [io.Path]::Combine($Global:BaseDir,  "sourceVipRequest.json")
+$sourceVipJson = [io.Path]::Combine($Global:BaseDir,  "sourceVip.json")
+$sourceVipRequest = [io.Path]::Combine($Global:BaseDir,  "sourceVipRequest.json")
 
-    $hnsNetwork = Get-HnsNetwork | ? Name -EQ vxlan0
-    $subnet = $hnsNetwork.Subnets[0].AddressPrefix
+$hnsNetwork = Get-HnsNetwork | ? Name -EQ vxlan
+$subnet = $hnsNetwork.Subnets[0].AddressPrefix
 
-    $ipamConfig = @"
-        {"cniVersion": "0.3.0", "name": "$hnsNetwork", "ipam":{"type":"host-local","ranges":[[{"subnet":"10.42.2.0/24"}]],"dataDir":"/var/lib/cni/networks"}}
+$ipamConfig = @"
+    {"cniVersion": "0.3.0", "name": "$hnsNetwork", "ipam":{"type":"host-local","ranges":[[{"subnet":"10.42.2.0/24"}]],"dataDir":"/var/lib/cni/networks"}}
 "@
-    $ipamConfig | Out-File sourceVipRequest.json
+$ipamConfig | Out-File sourceVipRequest.json
 
-    pushd
-    $env:CNI_COMMAND="ADD"
-    $env:CNI_CONTAINERID="dummy"
-    $env:CNI_NETNS="dummy"
-    $env:CNI_IFNAME="dummy"
-    $env:CNI_PATH="c:\opt\cni\bin"
-    cd $env:CNI_PATH
-    Get-Content sourceVipRequest.json | .\host-local.exe | Out-File sourceVip.json
-    $sourceVipJSONData = Get-Content sourceVip.json | ConvertFrom-Json
+pushd
+$env:CNI_COMMAND="ADD"
+$env:CNI_CONTAINERID="dummy"
+$env:CNI_NETNS="dummy"
+$env:CNI_IFNAME="dummy"
+$env:CNI_PATH="c:\opt\cni\bin"
+cd $env:CNI_PATH
+Get-Content sourceVipRequest.json | .\host-local.exe | Out-File sourceVip.json
+$sourceVipJSONData = Get-Content sourceVip.json | ConvertFrom-Json
 
-    Remove-Item env:CNI_COMMAND
-    Remove-Item env:CNI_CONTAINERID
-    Remove-Item env:CNI_NETNS
-    Remove-Item env:CNI_IFNAME
-    Remove-Item env:CNI_PATH
-    popd
+Remove-Item env:CNI_COMMAND
+Remove-Item env:CNI_CONTAINERID
+Remove-Item env:CNI_NETNS
+Remove-Item env:CNI_IFNAME
+Remove-Item env:CNI_PATH
+popd
 
-    return $sourceVipJSONData.ips[0].address.Split("/")[0]
+return $sourceVipJSONData.ips[0].address.Split("/")[0]
