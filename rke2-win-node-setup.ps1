@@ -10,16 +10,17 @@ $ProcessInfo.FileName = "$Env:ProgramFiles\containerd\containerd.exe"
 $ProcessInfo.RedirectStandardError = $true
 $ProcessInfo.RedirectStandardOutput = $true
 $ProcessInfo.UseShellExecute = $false
-$ProcessInfo.Arguments = "config default"
+# $ProcessInfo.Arguments = "config default"
 $Process = New-Object System.Diagnostics.Process
 $Process.StartInfo = $ProcessInfo
 $Process.Start() | Out-Null
 $Process.WaitForExit()
-$config = $Process.StandardOutput.ReadToEnd()
-$config = $config -replace "bin_dir = (.)*$", "bin_dir = `"c:/opt/cni/bin`""
-$config = $config -replace "conf_dir = (.)*$", "conf_dir = `"c:/etc/cni/net.d`""
-$config = $config -replace "sandbox_image = `"mcr.microsoft.com/oss/kubernetes/pause:1.4.0`"", "sandbox_image = `"docker.io/rancher/kubelet-pause:v0.1.6`""
-Set-Content -Path $Env:ProgramFiles\containerd\config.toml -Value $config -Force
+# $config = $Process.StandardOutput.ReadToEnd()
+# $config = $config -replace "bin_dir = (.)*$", "bin_dir = `"c:/opt/cni/bin`""
+# $config = $config -replace "conf_dir = (.)*$", "conf_dir = `"c:/etc/cni/net.d`""
+# $config = $config -replace "sandbox_image = `"mcr.microsoft.com/oss/kubernetes/pause:1.4.0`"", "sandbox_image = `"docker.io/rancher/kubelet-pause:v0.1.6`""
+# Set-Content -Path $Env:ProgramFiles\containerd\config.toml -Value $config -Force
+Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/config.toml -OutFile 'C:\Program Files\containerd\config.toml'
 
 Add-MpPreference -ExclusionProcess "$Env:ProgramFiles\containerd\containerd.exe"
 Start-Process -FilePath "$Env:ProgramFiles\containerd\containerd.exe" -ArgumentList "--register-service" -NoNewWindow
