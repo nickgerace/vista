@@ -148,3 +148,16 @@ Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/calico
 Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/install-calico.ps1 -OutFile c:\CalicoWindows\install-calico.ps1 -Force
 powershell c:\CalicoWindows\install-calico.ps1
 ```
+
+##### find source-vip for kube-proxy
+```powershell
+Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/source-vip.ps1 -OutFile c:\opt\cni\bin\source-vip.ps1
+Get-Content c:\opt\cni\bin\sourceVipRequest.json
+```
+
+##### example startup args for k8s components on windows
+##### will need the source-vip for kube-proxy generated from the above
+```powershell
+# c:\k\kubelet.exe --v=4 --config=c:\k\kubelet-config.yaml --kubeconfig=c:\k\config --hostname-override=$(hostname) --container-runtime=remote --container-runtime-endpoint='npipe:////./pipe/containerd-containerd' --cluster-dns=10.43.0.10 --feature-gates="WinOverlay=true"
+# c:\k\kube-proxy.exe --kubeconfig=c:\k\config --source-vip 10.42.2.3 --hostname-override=$(hostname) --proxy-mode=kernelspace --v=4 --cluster-cidr=10.42.0.0/16 --network-name=vxlan.calico --feature-gates="WinOverlay=true" --masquerade-all="false"
+```
