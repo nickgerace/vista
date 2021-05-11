@@ -44,6 +44,8 @@ $Env:KUBECONFIG="$Env:KUBECONFIG;$HOME\.kube\config"
 $KubernetesVersion = "1.20.6"
 $kubernetesPath = "C:\k"
 New-Item -ItemType Directory -Path $kubernetesPath -Force > $null
+
+# switch to pulling down the bundle found at https://dl.k8s.io/v1.20.6/kubernetes-node-windows-amd64.tar.gz
 Invoke-WebRequest -OutFile $kubernetesPath\kubelet.exe https://storage.googleapis.com/kubernetes-release/release/v$KubernetesVersion/bin/windows/amd64/kubelet.exe
 Invoke-WebRequest -OutFile $kubernetesPath\kubectl.exe https://storage.googleapis.com/kubernetes-release/release/v$KubernetesVersion/bin/windows/amd64/kubectl.exe
 Invoke-WebRequest -OutFile $kubernetesPath\kube-proxy.exe https://storage.googleapis.com/kubernetes-release/release/v$KubernetesVersion/bin/windows/amd64/kube-proxy.exe
