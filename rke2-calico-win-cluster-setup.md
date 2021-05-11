@@ -100,6 +100,9 @@ spec:
 ### Use the default kubeconfig from rke2-server
 #### substitute in the internal OR external IP/DNS for the `server:` line
 
+> Copy /etc/rancher/rke2/rke2.yaml on your machine located outside the cluster as ~/.kube/config. Then replace 127.0.0.1 with the IP or hostname of your RKE2 server. kubectl can now manage your RKE2 cluster.
+
+
 ##### located at `c:\k\config`
 ```yaml
 apiVersion: v1
