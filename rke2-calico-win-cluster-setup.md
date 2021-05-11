@@ -20,7 +20,7 @@ node-external-ip:
 ```
 
 ```
-curl -sfL https://get.rke2.io | sh - 
+curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=v1.20.6+rke2r1 sh - 
 
 systemctl enable rke2-server.service
 systemctl start rke2-server.service
@@ -50,7 +50,7 @@ token: <>
 ```
 
 ```
-curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE="agent" sh -
+curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE="agent" INSTALL_RKE2_VERSION=v1.20.6+rke2r1 sh -
 systemctl enable rke2-agent.service
 systemctl start rke2-agent.service
 
