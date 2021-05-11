@@ -38,6 +38,8 @@ $env:KUBERNETES_SERVICE_PORT = '6443'
 $env:NO_PROXY = '.svc,.cluster.local,10.42.0.0/16,10.43.0.0/16'
 $env:KUBE_NETWORK= 'vxlan.calico'
 $env:POD_NAMESPACE = 'kube-system'
+$Env:KUBECONFIG=("c:\k\config")
+$Env:KUBECONFIG="$Env:KUBECONFIG;$HOME\.kube\config"
 
 $KubernetesVersion = "1.20.6"
 $kubernetesPath = "C:\k"
