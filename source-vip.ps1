@@ -1,11 +1,11 @@
 $sourceVipJson = [io.Path]::Combine($Global:BaseDir,  "sourceVip.json")
 $sourceVipRequest = [io.Path]::Combine($Global:BaseDir,  "sourceVipRequest.json")
 
-$hnsNetwork = Get-HnsNetwork | ? Name -EQ External
+$hnsNetwork = Get-HnsNetwork | ? Name -EQ Calico
 $subnet = $hnsNetwork.Subnets[0].AddressPrefix
 
 $ipamConfig = @"
-    {"cniVersion": "0.3.1", "name": "$hnsNetwork", "ipam":{"type":"host-local","ranges":[[{"subnet":"10.42.2.0/24"}]],"dataDir":"/var/lib/cni/networks"}}
+    {"cniVersion": "0.3.1", "name": "Calico", "ipam":{"type":"host-local","ranges":[[{"subnet":"$subnet"}]],"dataDir":"/var/lib/cni/networks"}}
 "@
 $ipamConfig | Out-File sourceVipRequest.json
 
