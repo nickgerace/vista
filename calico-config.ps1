@@ -72,7 +72,7 @@ $env:VXLAN_MAC_PREFIX = "0E-2A"
 
 # RK - need to set this to your hostname
 # ex. $env:NODENAME = "ip-10-0-1-4.ec2.internal"
-$env:NODENAME = ""
+# $env:NODENAME = ""
 # Similarly, CALICO_K8S_NODE_REF should be set to the Kubernetes Node name.  When using etcd,
 # the Calico kube-controllers pod will clean up Calico node objects if the corresponding Kubernetes Node is
 # cleaned up.
