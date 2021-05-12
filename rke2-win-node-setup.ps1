@@ -52,6 +52,8 @@ Invoke-WebRequest -OutFile $kubernetesPath\kubectl.exe https://storage.googleapi
 Invoke-WebRequest -OutFile $kubernetesPath\kube-proxy.exe https://storage.googleapis.com/kubernetes-release/release/v$KubernetesVersion/bin/windows/amd64/kube-proxy.exe
 
 New-Item -ItemType Directory -Path "C:\opt\cni\bin" -Force >$null
+New-Item -ItemType Directory -Path "c:\opt\cni\config" -Force > $null
+
 Invoke-WebRequest -UseBasicParsing https://github.com/containernetworking/plugins/releases/download/v0.9.1/cni-plugins-windows-amd64-v0.9.1.tgz -OutFile c:\opt\cni\bin\cni-plugins.tgz
 cd c:\opt\cni\bin\ 
 tar -xzf cni-plugins.tgz
