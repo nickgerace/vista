@@ -5,16 +5,16 @@ curl.exe -L https://github.com/luthermonson/containerd/releases/download/win-bin
 curl.exe -L https://github.com/luthermonson/containerd/releases/download/win-bins/ctr.exe -o "$Env:ProgramFiles\containerd\ctr.exe"
 
 # Set containerd config.toml
-$ProcessInfo = New-Object System.Diagnostics.ProcessStartInfo
-$ProcessInfo.FileName = "$Env:ProgramFiles\containerd\containerd.exe"
-$ProcessInfo.RedirectStandardError = $true
-$ProcessInfo.RedirectStandardOutput = $true
-$ProcessInfo.UseShellExecute = $false
-# $ProcessInfo.Arguments = "config default"
-$Process = New-Object System.Diagnostics.Process
-$Process.StartInfo = $ProcessInfo
-$Process.Start() | Out-Null
-$Process.WaitForExit()
+# $ProcessInfo = New-Object System.Diagnostics.ProcessStartInfo
+# $ProcessInfo.FileName = "$Env:ProgramFiles\containerd\containerd.exe"
+# $ProcessInfo.RedirectStandardError = $true
+# $ProcessInfo.RedirectStandardOutput = $true
+# $ProcessInfo.UseShellExecute = $false
+# # $ProcessInfo.Arguments = "config default"
+# $Process = New-Object System.Diagnostics.Process
+# $Process.StartInfo = $ProcessInfo
+# $Process.Start() | Out-Null
+# $Process.WaitForExit()
 # $config = $Process.StandardOutput.ReadToEnd()
 # $config = $config -replace "bin_dir = (.)*$", "bin_dir = `"c:/opt/cni/bin`""
 # $config = $config -replace "conf_dir = (.)*$", "conf_dir = `"c:/etc/cni/net.d`""
