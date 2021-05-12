@@ -3,7 +3,7 @@
 
 ```
 mkdir -p /var/lib/rancher/rke2/server/manifests/
-curl https://docs.projectcalico.org/manifests/calico-vxlan.yaml -o /var/lib/rancher/rke2/server/manifests/calico-vxlan.yaml
+curl https://raw.githubusercontent.com/nickgerace/vista/main/calico-vxlan.yaml -o /var/lib/rancher/rke2/server/manifests/calico-vxlan.yaml
 
 mkdir -p /etc/rancher/rke2
 nano /etc/rancher/rke2/config.yaml
