@@ -140,14 +140,26 @@ Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/instal
 powershell c:\install-calico-windows.ps1 -DownloadOnly yes -KubeVersion 1.20.6 -ServiceCidr "10.42.0.0/16" -DNSServerIPs 10.43.0.10
 ```
 
-### Modify config.ps1 with your NODENAME or
-### comment out the NODENAME line and set the env var instead
+#### Modify config.ps1 with your NODENAME and uncomment
+##### OR
+#### Set your nodename using the output of the install-calico-windows.ps1
+`$env:NODENAME="<>"`
 
 ```powershell
-Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/calico-config.ps1 -OutFile c:\CalicoWindows\config.ps1 -Force
-Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/install-calico.ps1 -OutFile c:\CalicoWindows\install-calico.ps1 -Force
-powershell c:\CalicoWindows\install-calico.ps1
+Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/calico-config.ps1 -OutFile c:\CalicoWindows\config.ps1
+Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/install-calico.ps1 -OutFile c:\CalicoWindows\install-calico.ps1
 ```
+#### Start Kubelet, kube-proxy, etc
+##### example startup args for k8s components on windows
+##### will need the source-vip for kube-proxy generated from the above
+```powershell
+# c:\k\kubelet.exe --v=4 --config=c:\k\kubelet-config.yaml --kubeconfig=c:\k\config --hostname-override=$(hostname) --container-runtime=remote --container-runtime-endpoint='npipe:////./pipe/containerd-containerd' --cluster-dns=10.43.0.10 --feature-gates="WinOverlay=true"
+# c:\k\kube-proxy.exe --kubeconfig=c:\k\config --source-vip 10.42.2.3 --hostname-override=$(hostname) --proxy-mode=kernelspace --v=4 --cluster-cidr=10.42.0.0/16 --network-name=vxlan.calico --feature-gates="WinOverlay=true" --masquerade-all="false"
+```
+
+#### Install Calico, requires kubelet to be running to verify configuration
+##### Consider removing the verification
+`powershell c:\CalicoWindows\install-calico.ps1`
 
 ##### find source-vip for kube-proxy
 ```powershell
@@ -155,9 +167,3 @@ Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/source
 Get-Content c:\opt\cni\bin\sourceVipRequest.json
 ```
 
-##### example startup args for k8s components on windows
-##### will need the source-vip for kube-proxy generated from the above
-```powershell
-# c:\k\kubelet.exe --v=4 --config=c:\k\kubelet-config.yaml --kubeconfig=c:\k\config --hostname-override=$(hostname) --container-runtime=remote --container-runtime-endpoint='npipe:////./pipe/containerd-containerd' --cluster-dns=10.43.0.10 --feature-gates="WinOverlay=true"
-# c:\k\kube-proxy.exe --kubeconfig=c:\k\config --source-vip 10.42.2.3 --hostname-override=$(hostname) --proxy-mode=kernelspace --v=4 --cluster-cidr=10.42.0.0/16 --network-name=vxlan.calico --feature-gates="WinOverlay=true" --masquerade-all="false"
-```
