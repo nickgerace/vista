@@ -149,21 +149,24 @@ powershell c:\install-calico-windows.ps1 -DownloadOnly yes -KubeVersion 1.20.6 -
 Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/calico-config.ps1 -OutFile c:\CalicoWindows\config.ps1
 Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/install-calico.ps1 -OutFile c:\CalicoWindows\install-calico.ps1
 ```
-#### Start Kubelet, kube-proxy, etc
+#### Start Kubelet
 ##### example startup args for k8s components on windows
-##### will need the source-vip for kube-proxy generated from the above
-```powershell
-# c:\k\kubelet.exe --v=4 --config=c:\k\kubelet-config.yaml --kubeconfig=c:\k\config --hostname-override=$(hostname) --container-runtime=remote --container-runtime-endpoint='npipe:////./pipe/containerd-containerd' --cluster-dns=10.43.0.10 --feature-gates="WinOverlay=true"
-# c:\k\kube-proxy.exe --kubeconfig=c:\k\config --source-vip 10.42.2.3 --hostname-override=$(hostname) --proxy-mode=kernelspace --v=4 --cluster-cidr=10.42.0.0/16 --network-name=vxlan.calico --feature-gates="WinOverlay=true" --masquerade-all="false"
-```
+`Start-Job -ScriptBlock { c:\k\kubelet.exe --v=4 --config=c:\k\kubelet-config.yaml --kubeconfig=c:\k\config --hostname-override=$(hostname) --container-runtime=remote --container-runtime-endpoint='npipe:////./pipe/containerd-containerd' --cluster-dns=10.43.0.10 --feature-gates="WinOverlay=true" }`
 
-#### Install Calico, requires kubelet to be running to verify configuration
-##### Consider removing the verification
+#### Install Calico, requires kubelet to be running to verify configuration (kubelet will be complaining that CNI networks are not ready)
 `powershell c:\CalicoWindows\install-calico.ps1`
+
+##### for kube-proxy, will need the source-vip for kube-proxy generated from the above
+##### working source-vip.ps1 ref: https://gist.githubusercontent.com/rosskirkpat/daebb1b489299c9e12f76054e154b519/raw/464e69634955f32689396cff79f2a773d8d6d6b0/source-vip.ps1
+
 
 ##### find source-vip for kube-proxy
 ```powershell
 Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/source-vip.ps1 -OutFile c:\opt\cni\bin\source-vip.ps1
 Get-Content c:\opt\cni\bin\sourceVipRequest.json
 ```
+
+#### Start kube-proxy
+```
+c:\k\kube-proxy.exe --kubeconfig=c:\k\config --source-vip 192.168.104.66 --hostname-override=$(hostname) --proxy-mode=kernelspace --v=4 --cluster-cidr=10.42.0.0/16 --network-name=Calico --feature-gates="WinOverlay=true" --masquerade-all="false"```
 
