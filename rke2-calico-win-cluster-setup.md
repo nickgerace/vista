@@ -149,6 +149,14 @@ powershell c:\install-calico-windows.ps1 -DownloadOnly yes -KubeVersion 1.20.6 -
 Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/calico-config.ps1 -OutFile c:\CalicoWindows\config.ps1
 Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/install-calico.ps1 -OutFile c:\CalicoWindows\install-calico.ps1
 ```
+
+#### Setup resolv.conf for kubelet
+
+```powershell
+New-Item -ItemType Directory -Path c:\k\etc -Force > $null
+Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/resolv.conf -OutFile c:\k\etc\resolv.conf
+```
+
 #### Start Kubelet
 ##### example startup args for k8s components on windows
 `Start-Job -ScriptBlock { c:\k\kubelet.exe --v=4 --config=c:\k\kubelet-config.yaml --kubeconfig=c:\k\config --hostname-override=$(hostname) --container-runtime=remote --container-runtime-endpoint='npipe:////./pipe/containerd-containerd' --cluster-dns=10.43.0.10 --feature-gates="WinOverlay=true" }`
