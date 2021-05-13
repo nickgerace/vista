@@ -102,6 +102,10 @@ spec:
 
 > Copy /etc/rancher/rke2/rke2.yaml on your machine located outside the cluster as ~/.kube/config. Then replace 127.0.0.1 with the IP or hostname of your RKE2 server. kubectl can now manage your RKE2 cluster.
 
+```
+$kubernetesPath = "C:\k"
+New-Item -ItemType Directory -Path $kubernetesPath\etc -Force > $null
+```
 
 ##### located at `c:\k\config`
 ```yaml
@@ -159,7 +163,7 @@ Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/resolv
 
 #### Start Kubelet
 ##### example startup args for k8s components on windows
-`Start-Job -ScriptBlock { c:\k\kubelet.exe --v=4 --config=c:\k\kubelet-config.yaml --kubeconfig=c:\k\config --hostname-override=$(hostname) --container-runtime=remote --container-runtime-endpoint='npipe:////./pipe/containerd-containerd' --cluster-dns=10.43.0.10 --feature-gates="WinOverlay=true" }`
+`c:\k\kubelet.exe --v=4 --config=c:\k\kubelet-config.yaml --kubeconfig=c:\k\config --hostname-override=$(hostname) --container-runtime=remote --container-runtime-endpoint='npipe:////./pipe/containerd-containerd' --cluster-dns=10.43.0.10 --feature-gates="WinOverlay=true"`
 
 #### Install Calico, requires kubelet to be running to verify configuration (kubelet will be complaining that CNI networks are not ready)
 `powershell c:\CalicoWindows\install-calico.ps1`
@@ -175,6 +179,4 @@ Get-Content c:\opt\cni\bin\sourceVipRequest.json
 ```
 
 #### Start kube-proxy
-```
-c:\k\kube-proxy.exe --kubeconfig=c:\k\config --source-vip 192.168.104.66 --hostname-override=$(hostname) --proxy-mode=kernelspace --v=4 --cluster-cidr=10.42.0.0/16 --network-name=Calico --feature-gates="WinOverlay=true" --masquerade-all="false"```
-
+`c:\k\kube-proxy.exe --kubeconfig=c:\k\config --source-vip 10.42.89.130 --hostname-override=$(hostname) --proxy-mode=kernelspace --v=4 --cluster-cidr=10.42.0.0/16 --network-name=Calico --feature-gates="WinOverlay=true" --masquerade-all="false"`
