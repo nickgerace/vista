@@ -40,6 +40,8 @@ $env:NO_PROXY = '.svc,.cluster.local,10.42.0.0/16,10.43.0.0/16'
 $env:KUBE_NETWORK = "Calico.*"
 $env:POD_NAMESPACE = 'kube-system'
 $Env:KUBECONFIG=("c:\k\config")
+$global:KUBECONFIG="c:\k\config"
+$env:KUBECONFIG="c:\k\config"
 # $Env:KUBECONFIG="$Env:KUBECONFIG;$HOME\.kube\config"
 
 $KubernetesVersion = "1.20.6"
@@ -51,6 +53,7 @@ Invoke-WebRequest -OutFile $kubernetesPath\kubelet.exe https://storage.googleapi
 Invoke-WebRequest -OutFile $kubernetesPath\kubectl.exe https://storage.googleapis.com/kubernetes-release/release/v$KubernetesVersion/bin/windows/amd64/kubectl.exe
 Invoke-WebRequest -OutFile $kubernetesPath\kube-proxy.exe https://storage.googleapis.com/kubernetes-release/release/v$KubernetesVersion/bin/windows/amd64/kube-proxy.exe
 
+New-Item -ItemType Directory -Path "c:\k\etc" -Force > $null
 New-Item -ItemType Directory -Path "C:\opt\cni\bin" -Force >$null
 New-Item -ItemType Directory -Path "C:\etc\cni\net.d" -Force > $null
 
