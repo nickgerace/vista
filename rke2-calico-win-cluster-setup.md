@@ -161,6 +161,15 @@ New-Item -ItemType Directory -Path c:\k\etc -Force > $null
 Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/resolv.conf -OutFile c:\k\etc\resolv.conf
 ```
 
+#### download, place, and configure crictl in relevant dirs
+```powershell
+Invoke-WebRequest https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.21.0/crictl-v1.21.0-windows-amd64.tar.gz -OutFile c:\crictl-v1.21.0-windows-amd64.tar.gz
+cd c:\
+tar -xzf crictl-v1.21.0-windows-amd64.tar.gz
+copy-item c:\crictl.exe 'C:\Program Files\containerd\'
+c:\crictl.exe config --set runtime-endpoint=npipe:////./pipe/containerd-containerd
+```
+
 #### Start Kubelet
 ##### example startup args for k8s components on windows
 `c:\k\kubelet.exe --v=4 --config=c:\k\kubelet-config.yaml --kubeconfig=c:\k\config --hostname-override=$(hostname) --container-runtime=remote --container-runtime-endpoint='npipe:////./pipe/containerd-containerd' --cluster-dns=10.43.0.10 --feature-gates="WinOverlay=true"`
