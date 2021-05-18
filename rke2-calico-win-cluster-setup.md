@@ -189,3 +189,28 @@ Get-Content c:\opt\cni\bin\sourceVipRequest.json
 
 #### Start kube-proxy
 `c:\k\kube-proxy.exe --kubeconfig=c:\k\config --source-vip 10.42.89.130 --hostname-override=$(hostname) --proxy-mode=kernelspace --v=4 --cluster-cidr=10.42.0.0/16 --network-name=Calico --feature-gates="WinOverlay=true" --masquerade-all="false"`
+
+
+### nginx for Windows
+```powershell
+New-Item -ItemType Directory -Path c:\etc\nginx -Force > $null
+New-Item -ItemType Directory -Path c:\etc\nginx\conf -Force > $null
+New-Item -ItemType Directory -Path c:\etc\nginx\logs -Force > $null
+```
+
+#### pull down nginx config and executable
+#### need to upgrade nginx, current version is 1.15.9
+##### nginx version: nginx/1.15.9
+```powershell
+Invoke-WebRequest https://raw.githubusercontent.com/nickgerace/vista/main/win-nginx.conf -OutFile "c:\etc\nginx\conf\nginx.conf"
+Invoke-WebRequest https://github.com/nickgerace/vista/raw/main/win-nginx.exe -OutFile "c:\etc\nginx\nginx.exe"
+```
+
+#### replace CPHOST with your rke2 server IP
+`((Get-Content -path c:\etc\nginx\conf\nginx.conf -Raw) -replace 'CPHOST','10.0.1.156') | Set-Content -Path c:\etc\nginx\conf\nginx.conf`
+
+#### Validate nginx config and set prefix path
+`c:\etc\nginx\nginx.exe -p c:/etc/nginx -T`
+
+#### start nginx
+`start-job -scriptblock { c:\etc\nginx\nginx.exe -p c:/etc/nginx}`
