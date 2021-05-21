@@ -21,3 +21,18 @@ spec:
         image: mcr.microsoft.com/windows/servercore/iis:windowsservercore-2004
         ports:
         - containerPort: 80
+        env:
+          - name: RKE2_COREDNS_RKE2_COREDNS_SERVICE_HOST
+            value: "10.43.0.10"
+          - name: RKE2_COREDNS_RKE2_COREDNS_PORT_53_TCP
+            value: "tcp://10.43.0.10:53"
+          - name: RKE2_COREDNS_RKE2_COREDNS_PORT_53_TCP_ADDR
+            value: "10.43.0.10"
+          - name: RKE2_COREDNS_RKE2_COREDNS_PORT_53_TCP_PORT
+            value: "53"
+          - name: RKE2_COREDNS_RKE2_COREDNS_SERVICE_PORT
+            value: "53"
+          - name: RKE2_COREDNS_RKE2_COREDNS_SERVICE_PORT_TCP_53
+            value: "53"
+          - name: RKE2_COREDNS_RKE2_COREDNS_PORT_53_TCP_PROTO
+            value: "tcp"
